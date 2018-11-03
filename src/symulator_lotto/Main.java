@@ -8,7 +8,9 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        lottoCoupon(6);
+        final int HOW_MANY_NUM = 6;
+        
+        lottoResult(lottoCoupon(HOW_MANY_NUM),lotteryNum(HOW_MANY_NUM));
 
     }
 
@@ -57,7 +59,25 @@ public class Main {
                 howManyNum--;
             }
         }
+        Arrays.sort(result);
+        System.out.println("Wylosowane liczby to: " + Arrays.toString(result));
+        return result;
+    }
 
-
+    static void lottoResult(int[] coupon, int[] lotto) {
+        int result = 0;
+        for (int i = 0; i < coupon.length; i++) {
+            if (ArrayUtils.contains(lotto, coupon[i])) {
+                result++;
+            }
+        }
+        
+        if (result == lotto.length) {
+            System.out.println("GRATULUJĘ GŁÓWNEJ WYGRANEJ");
+        } else if (result >= 3) {
+            System.out.println("Gratuluję trafienia " + result + "liczb.");
+        } else {
+            System.out.println("Niestety nic nie wygrałeś");
+        }
     }
 }
