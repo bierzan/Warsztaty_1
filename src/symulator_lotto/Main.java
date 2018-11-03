@@ -7,21 +7,23 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
+    final static int HOW_MANY_NUM = 6;
+
     public static void main(String[] args) {
-        final int HOW_MANY_NUM = 6;
-        
-        lottoResult(lottoCoupon(HOW_MANY_NUM),lotteryNum(HOW_MANY_NUM));
+
+        lottoResult(lottoCoupon(), lotteryNum());
 
     }
 
-    static int[] lottoCoupon(int howManyNum) {
+    static int[] lottoCoupon() {
         Scanner sc = new Scanner(System.in);
 
-        int[] coupon = new int[howManyNum];
+        int[] coupon = new int[HOW_MANY_NUM];
+        int count = HOW_MANY_NUM;
 
         System.out.println("Podaj pierwszą liczbę do Twojego kuponu Lotto");
 
-        while (howManyNum > 0) {
+        while (count > 0) {
             while (!sc.hasNextInt()) {
                 sc.next();
                 System.out.println("To nie jest liczba");
@@ -30,8 +32,8 @@ public class Main {
 
             if (num > 0 && num < 50) {
                 if (!ArrayUtils.contains(coupon, num)) {
-                    coupon[howManyNum - 1] = num;
-                    howManyNum--;
+                    coupon[count - 1] = num;
+                    count--;
                     System.out.println("Podaj kolejną liczbę");
                 } else {
                     System.out.println("Ta liczba już została wytypowana");
@@ -46,17 +48,18 @@ public class Main {
         return coupon;
     }
 
-    static int[] lotteryNum(int howManyNum) {
+    static int[] lotteryNum() {
         Random randNum = new Random();
-        int[] result = new int[howManyNum];
+        int[] result = new int[HOW_MANY_NUM];
+        int count = HOW_MANY_NUM;
 
-        while (howManyNum > 0) {
+        while (count > 0) {
 
             int num = 1 + randNum.nextInt(48);
 
             if (!ArrayUtils.contains(result, num)) {
-                result[howManyNum - 1] = num;
-                howManyNum--;
+                result[count - 1] = num;
+                count--;
             }
         }
         Arrays.sort(result);
@@ -71,7 +74,7 @@ public class Main {
                 result++;
             }
         }
-        
+
         if (result == lotto.length) {
             System.out.println("GRATULUJĘ GŁÓWNEJ WYGRANEJ");
         } else if (result >= 3) {
