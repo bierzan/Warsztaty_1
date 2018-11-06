@@ -53,11 +53,16 @@ public class Main {
         }
 
         System.out.println("Podaj liczbę ścian kostki");
-        while (!sc.hasNextInt()) {
-            sc.next();
-            System.out.println("Podana wartość nie jest liczbą");
+        while (diceSides==null || Integer.valueOf(diceSides)<=0) {
+            while (!sc.hasNextInt()) {
+                sc.next();
+                System.out.println("Podana wartość nie jest liczbą");
+            }
+            diceSides = String.valueOf(sc.nextInt());
+            if (Integer.valueOf(diceSides)<=0){
+                System.out.println("Podana wartość nie możę być mniejsza lub równa 0");
+            }
         }
-        diceSides = String.valueOf(sc.nextInt());
         sb.append("D" + diceSides);
 
         System.out.println("Podaj modyfikator");
@@ -80,7 +85,7 @@ public class Main {
         int result = 1;
         String[] rollCodeSplit = rollType.split("D");
 
-        if (!rollCodeSplit.equals("D")) {
+        if (!rollCodeSplit[0].equals("")) {
             result = Integer.valueOf(rollCodeSplit[0]);
         }
         return result;
@@ -91,7 +96,7 @@ public class Main {
         String[] rollCodeSplit = rollType.split("D");
 
         if (rollCodeSplit[1].contains("+")) {
-            String[] rollCodeSplit2 = rollCodeSplit[1].split("+");
+            String[] rollCodeSplit2 = rollCodeSplit[1].split("\\+");
             result = Integer.valueOf(rollCodeSplit2[0]);
         } else if (rollCodeSplit[1].contains("-")) {
             String[] rollCodeSplit2 = rollCodeSplit[1].split("-");
@@ -105,7 +110,7 @@ public class Main {
     private static int modValue(String rollType) {
         int result = 0;
         if (rollType.contains("+")) {
-            String[] rollSplit = rollType.split("+");
+            String[] rollSplit = rollType.split("\\+");
             result = Integer.valueOf(rollSplit[rollSplit.length - 1]);
         } else if (rollType.contains("-")) {
             String[] rollSplit = rollType.split("-");
