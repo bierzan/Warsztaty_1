@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -27,12 +27,12 @@ public class Main {
 
         String popWords = "popular_words.txt";
         String filteredPopWords = "filtered_popular_words";
-        int minWordLenght = 3;
-        String[] censor = {"przez", "oraz", "jak", "kto", "się", "czyli", "dla"};
+        int minWordLength = 3;
+        String[] censor = {"przez", "oraz", "jak", "kto", "się", "czyli", "dla", "nie", "jest", "już", "będzie", "może", "czy"};
 
 
         savePopularWords(scanWebForTitlesAndSplitWords(sitesAndSelectors), popWords);
-        readAndSaveFilteredWords(popWords, filteredPopWords, minWordLenght, censor);
+        readAndSaveFilteredWords(popWords, filteredPopWords, minWordLength, censor);
 
 
     }
@@ -90,14 +90,63 @@ public class Main {
             e.printStackTrace();
         }
         try {
-            Files.write(destPath, filteredList);
+            Files.write(destPath, filteredList); //potem zapisywanie zostnaie przeniesiony po pogrupowaniu plikow
         } catch (IOException e) {
             e.printStackTrace();
         }
+        String[] arrToTab = new String[filteredList.size()];
+        arrToTab = filteredList.toArray(arrToTab);
+
+        groupWordsByOccur(countAndSortWords(arrToTab));
 
     }
 
+    private static String[][] countAndSortWords(String[] words) {
 
+        String[] wordsList = Arrays.copyOf(words, words.length);
+        Set<String> wordsSet = new HashSet<String>(Arrays.asList(words));
+
+        String[] uniqueWords = wordsSet.toArray(new String[0]);
+        int[] countWords = new int[uniqueWords.length];
+
+        for (int i = 0; i < uniqueWords.length; i++) {
+            int count = 0;
+            for (int j = 0; j < wordsList.length; j++) {
+                if (uniqueWords[i].equals(wordsList[j])) {
+                    count++;
+                    countWords[i] = count;
+                }
+            }
+        }
+
+        String[][] countedWords = new String[uniqueWords.length][2];
+
+        for (int i = 0; i < countedWords.length; i++) {
+            countedWords[i][0] = String.valueOf(countWords[i]);
+            countedWords[i][1] = uniqueWords[i];
+        }
+
+        return countedWords;
+    }
+
+    private static String[][] groupWordsByOccur(String[][] countedWords) {
+
+        Arrays.sort(countedWords, new Comparator<String[]>() {
+            @Override
+            public int compare(String[] o1, String[] o2) {
+                String itemOne = o1[0];
+                String itemTwo = o2[0];
+                return Integer.valueOf(itemTwo).compareTo(Integer.valueOf(itemOne));
+            }
+        });
+        for (int i = 0; i < countedWords.length; i++) {
+
+            System.out.println(Arrays.toString(countedWords[i]));
+        }
+
+        return countedWords;
+    } // przerobic na arrayliste wedlug ilosci wystapiec
+    //potem tylko juz ustawic do zapisywania do pliku
 
 
 }
