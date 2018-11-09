@@ -33,7 +33,7 @@ public class Main {
 
         savePopularWords(scanWebForTitlesAndSplitWords(sitesAndSelectors), popWords);
         readAndSaveFilteredWords(popWords, filteredPopWords, minWordLength, censor);
-
+        
 
     }
 
@@ -97,7 +97,8 @@ public class Main {
         String[] arrToTab = new String[filteredList.size()];
         arrToTab = filteredList.toArray(arrToTab);
 
-        groupWordsByOccur(countAndSortWords(arrToTab));
+        String[][] str= groupWordsByOccur(countAndSortWords(arrToTab));
+        wordsByOccur(str);
 
     }
 
@@ -139,14 +140,32 @@ public class Main {
                 return Integer.valueOf(itemTwo).compareTo(Integer.valueOf(itemOne));
             }
         });
-        for (int i = 0; i < countedWords.length; i++) {
-
-            System.out.println(Arrays.toString(countedWords[i]));
-        }
 
         return countedWords;
-    } // przerobic na arrayliste wedlug ilosci wystapiec
-    //potem tylko juz ustawic do zapisywania do pliku
+    }
+
+    private static ArrayList<ArrayList<String>> wordsByOccur(String[][] numAndWord){
+        ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>();
+
+        ArrayList<String> a = new ArrayList<>();
+
+        for(int i = 0; i<numAndWord.length-1; i++){
+
+            if(a.size()==0){
+                a.add(numAndWord[i][0]);
+            }
+            a.add(numAndWord[i][1]);
+
+            if(!a.get(0).equals(numAndWord[i+1][0])){
+                System.out.println(ArrayUtils.toString(a));
+                result.add(a);
+                a.clear();
+            }
+
+        }
+        return result;
+
+    }
 
 
 }
