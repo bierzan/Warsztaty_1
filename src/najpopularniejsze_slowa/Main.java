@@ -25,18 +25,24 @@ public class Main {
                 {"http://www.gpcodziennie.pl", ".title"}
         };
 
+
         String popWords = "popular_words.txt";
         String filteredPopWords = "filtered_popular_words";
+        String words = "filtered_and_grouped.txt";
         int minWordLength = 3;
         String[] censor = {"przez", "oraz", "jak", "kto", "się", "czyli", "dla", "nie", "jest", "już", "będzie", "może", "czy"};
 
 
         savePopularWords(scanWebForTitlesAndSplitWords(sitesAndSelectors), popWords);
-        readAndSaveFilteredWords(popWords, filteredPopWords, minWordLength, censor);
-        
+
+        String wordsList = wordsByOccur(countAndSortWords(readAndFilter(popWords, minWordLength, censor)));
+
+        saveWithDate(wordsList, words);
+
 
     }
 
+    // czytanie wyrazow z artykulow i zapis do jako string
     private static String[] scanWebForTitlesAndSplitWords(String[][] webAndSelector) {
 
         StringBuilder sb = new StringBuilder();
@@ -59,6 +65,7 @@ public class Main {
 
     }
 
+    // zapis znalezionych wyrazow do pliku
     private static void savePopularWords(String[] str, String fileName) {
         Path path = Paths.get(fileName);
         ArrayList<String> wordsList = new ArrayList<>();
@@ -74,9 +81,9 @@ public class Main {
 
     }
 
-    private static void readAndSaveFilteredWords(String resFile, String destFile, int minWordLenght, String[] wordsToRemove) {
+    // filtruje za krotkie wyrazy i te z listy zakazanych
+    private static String[] readAndFilter(String resFile, int minWordLenght, String[] wordsToRemove) {
         Path resPath = Paths.get(resFile);
-        Path destPath = Paths.get(destFile);
 
         ArrayList<String> filteredList = new ArrayList<>();
 
@@ -89,19 +96,11 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        try {
-            Files.write(destPath, filteredList); //potem zapisywanie zostnaie przeniesiony po pogrupowaniu plikow
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         String[] arrToTab = new String[filteredList.size()];
-        arrToTab = filteredList.toArray(arrToTab);
-
-        String[][] str= groupWordsByOccur(countAndSortWords(arrToTab));
-        wordsByOccur(str);
-
+        return arrToTab = filteredList.toArray(arrToTab);
     }
 
+    // liczy ilosc wystapien każdego wyrazu
     private static String[][] countAndSortWords(String[] words) {
 
         String[] wordsList = Arrays.copyOf(words, words.length);
@@ -127,11 +126,7 @@ public class Main {
             countedWords[i][1] = uniqueWords[i];
         }
 
-        return countedWords;
-    }
-
-    private static String[][] groupWordsByOccur(String[][] countedWords) {
-
+        //sortowanie wyrazow 2d tabeli wedlug pierwszej pozycji
         Arrays.sort(countedWords, new Comparator<String[]>() {
             @Override
             public int compare(String[] o1, String[] o2) {
@@ -144,26 +139,62 @@ public class Main {
         return countedWords;
     }
 
-    private static ArrayList<ArrayList<String>> wordsByOccur(String[][] numAndWord){
+    private static String wordsByOccur(String[][] numAndWord) {
         ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>();
 
         ArrayList<String> a = new ArrayList<>();
 
-        for(int i = 0; i<numAndWord.length-1; i++){
+        for (int i = 0; i < numAndWord.length - 1; i++) {
 
-            if(a.size()==0){
+            if (a.size() == 0) {
                 a.add(numAndWord[i][0]);
             }
             a.add(numAndWord[i][1]);
 
-            if(!a.get(0).equals(numAndWord[i+1][0])){
-                System.out.println(ArrayUtils.toString(a));
-                result.add(a);
+            if (!a.get(0).equals(numAndWord[i + 1][0])) {
+                result.add(new ArrayList<>(a));
                 a.clear();
             }
 
         }
-        return result;
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < result.size(); i++) {
+            sb.append("\nSłowa powtórzone " + result.get(i).get(0) + "razy: \n");
+
+            int count = 0;
+
+            for (int j = 1; j < result.get(i).size(); j++) {
+                sb.append(result.get(i).get(j) + "\t\t\t");
+                if (count < 3) {
+                    count++;
+                } else {
+                    sb.append("\n");
+                    count = 0;
+                }
+
+            }
+            sb.append("\n-------------------------------\n");
+
+        }
+        String str2 = sb.toString();
+        return str2;
+
+    }
+
+    private static void saveWithDate(String str, String destFile) {
+
+        Path destPath = Paths.get(destFile);
+
+        ArrayList<String> finalList = new ArrayList<>();
+        finalList.add(str);
+        try {
+            Files.write(destPath, finalList);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
