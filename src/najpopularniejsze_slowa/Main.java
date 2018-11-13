@@ -14,31 +14,30 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class Main {
-    public static void main(String[] args) {
 
-        String[][] sitesAndSelectors = {
-                {"http://www.onet.pl", "span.title"},
-                {"http://www.gazeta.pl", ".o-article__header"},
-                {"http://www.rzeczpospolita.pl", ".teaser__title"},
-                {"http://www.tvn24.pl", "article"},
-                {"http://www.gpcodziennie.pl", ".title"}
-        };
+public class Main {
+    final static String DATE = String.valueOf(java.time.LocalDate.now());
+    final static String[][] SITES_AND_SELECTORS = {
+            {"http://www.onet.pl", "span.title"},
+            {"http://www.gazeta.pl", ".o-article__header"},
+            {"http://www.rzeczpospolita.pl", ".teaser__title"},
+            {"http://www.tvn24.pl", "article"},
+            {"http://www.gpcodziennie.pl", ".title"}
+    };
+
+    public static void main(String[] args) {
 
 
         String popWords = "popular_words.txt";
-        String filteredPopWords = "filtered_popular_words";
-        String words = "filtered_and_grouped.txt";
+        String words = "src/popular_words/pop_words_" + DATE + ".txt";
         int minWordLength = 3;
-        String[] censor = {"przez", "oraz", "jak", "kto", "się", "czyli", "dla", "nie", "jest", "już", "będzie", "może", "czy"};
+        String[] censor = {"ale", "przez", "oraz", "jak", "kto", "się", "czyli", "dla", "nie", "jest", "już", "będzie", "może", "czy"};
 
-
-        savePopularWords(scanWebForTitlesAndSplitWords(sitesAndSelectors), popWords);
+        savePopularWords(scanWebForTitlesAndSplitWords(SITES_AND_SELECTORS), popWords);
 
         String wordsList = wordsByOccur(countAndSortWords(readAndFilter(popWords, minWordLength, censor)));
 
         saveWithDate(wordsList, words);
-
 
     }
 
@@ -53,16 +52,13 @@ public class Main {
                 Document document = connect.get();
                 Elements links = document.select(webAndSelector[i][1]);
                 for (Element elem : links) {
-
                     sb.append(elem.text() + " ");
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
         return sb.toString().split("[,.\\-:; \'\"]");
-
     }
 
     // zapis znalezionych wyrazow do pliku
@@ -139,6 +135,7 @@ public class Main {
         return countedWords;
     }
 
+    // grupuje słowa według liczby wystąpień
     private static String wordsByOccur(String[][] numAndWord) {
         ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>();
 
@@ -155,34 +152,44 @@ public class Main {
                 result.add(new ArrayList<>(a));
                 a.clear();
             }
-
         }
 
         StringBuilder sb = new StringBuilder();
+        sb.append(DATE);
+        sb.append("\n");
+        sb.append("ŹRÓDŁA:\n");
+        for (String[] line : SITES_AND_SELECTORS) {
+            sb.append(line[0]);
+            sb.append("\n");
+        }
 
         for (int i = 0; i < result.size(); i++) {
-            sb.append("\nSłowa powtórzone " + result.get(i).get(0) + "razy: \n");
-
+            sb.append("\nSŁOWA POWTÓRZONE " + result.get(i).get(0) + "RAZY: \n");
             int count = 0;
 
             for (int j = 1; j < result.get(i).size(); j++) {
-                sb.append(result.get(i).get(j) + "\t\t\t");
+                sb.append("| " + result.get(i).get(j));
+                int white = 21 - result.get(i).get(j).length();
+
+                while (white > 0) {
+                    sb.append(" ");
+                    white--;
+                }
+
                 if (count < 3) {
                     count++;
                 } else {
                     sb.append("\n");
                     count = 0;
                 }
-
             }
             sb.append("\n-------------------------------\n");
-
         }
-        String str2 = sb.toString();
-        return str2;
-
+        String report = sb.toString();
+        return report;
     }
 
+    //zapis do pliku
     private static void saveWithDate(String str, String destFile) {
 
         Path destPath = Paths.get(destFile);
@@ -194,9 +201,5 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
-
-
 }
